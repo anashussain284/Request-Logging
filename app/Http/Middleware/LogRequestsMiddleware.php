@@ -6,6 +6,7 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Log;
+use App\Models\LogRequestsModel;
 
 class LogRequestsMiddleware
 {
@@ -21,12 +22,12 @@ class LogRequestsMiddleware
         $endTime = microtime(true);
         $executionTime = number_format(($endTime - $startTime) * 1000, 2);
 
-        Log::warning("----START----");
-        Log::info("method = {$request->method()}");
-        Log::info("url = {$request->fullUrl()}");
-        Log::info("ip = {$request->ip()}");
-        Log::info("response_time_ms = {$executionTime}");
-        Log::warning("----END----");
+        LogRequestsModel::create([
+            'method' => $request->method(),
+            'url' => $request->fullUrl(),
+            'ip' => $request->ip(),
+            'response_time_ms' => $executionTime
+        ]);
 
         return $response;
     }
