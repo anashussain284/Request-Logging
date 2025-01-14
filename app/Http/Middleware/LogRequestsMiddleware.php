@@ -17,15 +17,18 @@ class LogRequestsMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        /** Check logging toggle value is enable/disable */
         if (!config('logging.enable_request_logging', false)) {
             return $next($request);
         }
 
+        /** Calculate the execution time */
         $startTime = microtime(true);
         $response = $next($request);
         $endTime = microtime(true);
         $executionTime = number_format(($endTime - $startTime) * 1000, 2);
 
+        /** Save request details into DB */
         LogRequestsModel::create([
             'method' => $request->method(),
             'url' => $request->fullUrl(),
