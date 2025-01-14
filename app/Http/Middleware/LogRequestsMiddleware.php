@@ -17,6 +17,10 @@ class LogRequestsMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (!config('logging.enable_request_logging', false)) {
+            return $next($request);
+        }
+
         $startTime = microtime(true);
         $response = $next($request);
         $endTime = microtime(true);
