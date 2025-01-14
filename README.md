@@ -158,9 +158,6 @@ php artisan config:clear
 php artisan config:cache
 ```
 ---
-Here’s a suggested structure for the "Technologies Used" and "Contributors" sections in your `README.md` file:
-
----
 
 ## Technologies Used
 
