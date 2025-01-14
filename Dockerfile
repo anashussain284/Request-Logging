@@ -1,33 +1,29 @@
-# Use the official PHP image with Apache
+# Use PHP 8.2 with Apache as the base image
 FROM php:8.2-apache
 
-# Install necessary extensions and dependencies
+# Install SQLite3 development libraries and other necessary tools
 RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    zip \
-    git \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql
+    sqlite3 \
+    libsqlite3-dev \
+    && docker-php-ext-install pdo pdo_sqlite
 
-# Enable mod_rewrite for Laravel
+# Enable mod_rewrite for Apache
 RUN a2enmod rewrite
 
-# Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+# Copy the custom Apache configuration file
+COPY docker/apache.conf /etc/apache2/sites-available/000-default.conf
 
-# Set the working directory in the container
+# Set the working directory inside the container
 WORKDIR /var/www/html
 
-# Copy the Laravel application into the container
-COPY . .
+# Copy the Laravel project into the container
+COPY . /var/www/html
 
-# Set permissions for storage and cache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# Install Composer (dependency manager for PHP)
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Expose port 80
+# Install Laravel dependencies
+RUN composer install
+
+# Expose port 80 for Apache
 EXPOSE 80
-
-# Start Apache in the background
-CMD ["apache2-foreground"]
